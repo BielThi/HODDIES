@@ -127,7 +127,7 @@ def compute_wp(pos1, edges, boxsize, pimax=40, los='z', nthreads=32, R1R2=None, 
     return project_to_wp(result, pimax=pimax)
 
 
-@njit(parallel=True, fastmath=True)
+@njit(fastmath=True)
 def compute_N(log10_Mh, fun_cHOD, fun_sHOD, p_cen, p_sat, p_ab=None, Nthread=32, ab_arr=None, conformity=False, link_sat_to_central=False, seed=None):
     """
     Compute the number of central and satellite galaxies in a halo using a HOD (Halo Occupation Distribution) model.
@@ -175,7 +175,7 @@ def compute_N(log10_Mh, fun_cHOD, fun_sHOD, p_cen, p_sat, p_ab=None, Nthread=32,
     proba_sat = np.empty_like(log10_Mh, dtype=np.int64)
     
     # figuring out the number of halos kept for each thread
-    for tid in numba.prange(Nthread):
+    for tid in range(Nthread):
         if seed is not None:
             np.random.seed(seed[tid])
         for i in range(int(hstart[tid]), int(hstart[tid + 1])):
@@ -243,7 +243,7 @@ def _rescale(a, b):
 
     return np.transpose(np.multiply(np.transpose(a), np.transpose(b)))
 
-@njit(parallel=True, fastmath=True)
+@njit(fastmath=True)
 def getPointsOnSphere_jit(nPoints, Nthread=32, seed=None):
     """
     Generate random points on a sphere surface using numba jit.
@@ -269,7 +269,7 @@ def getPointsOnSphere_jit(nPoints, Nthread=32, seed=None):
     cmin = -1
     cmax = +1
 
-    for tid in numba.prange(Nthread):
+    for tid in range(ind):
         if seed is not None:
             np.random.seed(seed[tid])
         for i in range(hstart[tid], hstart[tid + 1]):
@@ -349,7 +349,7 @@ def rd_draw_NFW(nPoints, burn_in=100000):
 
 
 
-@njit(parallel=True, fastmath=True)
+@njit(fastmath=True)
 def compute_ngal(log10_Mh, fun_cHOD, fun_sHOD, Nthread, p_cen, p_sat=None, conformity=False, link_sat_to_central=False):
     """
     Compute total number of galaxies and satellite fraction from a given HOD parameter set.
@@ -384,7 +384,7 @@ def compute_ngal(log10_Mh, fun_cHOD, fun_sHOD, Nthread, p_cen, p_sat=None, confo
     hstart = np.rint(np.linspace(0, len(logbinM)-1, Nthread + 1))
     #p_sat=None
     if p_sat is not None :
-        for tid in numba.prange(Nthread):
+        for tid in range(Nthread):
             for i in range(int(hstart[tid]), int(hstart[tid + 1])):
                 LogM = ((logbinM[i]+logbinM[i+1])*0.5)
                 Ncent = fun_cHOD(LogM, p_cen)
@@ -399,7 +399,7 @@ def compute_ngal(log10_Mh, fun_cHOD, fun_sHOD, Nthread, p_cen, p_sat=None, confo
         ngal_tot = ngal_c+ngal_sat
         return ngal_tot, ngal_sat/ngal_tot
     else : 
-        for tid in numba.prange(Nthread):
+        for tid in range(Nthread):
             for i in range(int(hstart[tid]), int(hstart[tid + 1])):
                 LogM = ((logbinM[i]+logbinM[i+1])*0.5)
                 Ncent = fun_cHOD(LogM, p_cen)
@@ -412,7 +412,7 @@ def compute_ngal(log10_Mh, fun_cHOD, fun_sHOD, Nthread, p_cen, p_sat=None, confo
 """Interpolation of lambertw function for NFW computation"""
 xt = np.linspace(-1,0,1000000)
 ft = np.real(scipy.special.lambertw(xt, k=0))
-interp_lambertw= njit(parallel=True, fastmath=True)(lambda x: np.interp(x, xt, ft))
+interp_lambertw= njit(fastmath=True)(lambda x: np.interp(x, xt, ft))
 
 @njit(fastmath=True)
 def get_etavir_nfw(c): 
@@ -431,7 +431,7 @@ def get_etavir_nfw(c):
     rd_u = np.random.uniform() * (np.log(1.0 + c)-c/(1.0 + c))
     return (-(1.0/interp_lambertw(-np.exp(-rd_u-1)))-1)/c
 
-@njit(parallel=True, fastmath=True)
+@njit(fastmath=True)
 def compute_fast_NFW(x_h, y_h, z_h, vx_h, vy_h, vz_h, c, M, Rvir, rd_pos, rd_vel, exp_frac=0, exp_scale=1, nfw_rescale=1, vrms_h=None, f_sigv=None, v_infall=None, vel_sat='NFW', Nthread=32, seed=None):
     
     """
@@ -487,7 +487,7 @@ def compute_fast_NFW(x_h, y_h, z_h, vx_h, vy_h, vz_h, c, M, Rvir, rd_pos, rd_vel
 
     # starting index of each thread
     hstart = np.rint(np.linspace(0, x_h.size, Nthread + 1))
-    for tid in numba.prange(Nthread):
+    for tid in range(Nthread):
         if seed is not None:
             np.random.seed(seed[tid])
         for i in range(int(hstart[tid]), int(hstart[tid + 1])):
@@ -634,7 +634,7 @@ def compute_power_spectrum(pos1, boxsize, kedges, pos2=None, los='z', nmesh=256,
     return result.poles
 
 
-@njit(parallel=True)
+@njit
 def find_indices(part_id, sat_id, Nthread):
     numba.set_num_threads(Nthread)
     n = len(part_id)
@@ -650,7 +650,7 @@ def find_indices(part_id, sat_id, Nthread):
 
     # Phase 2 — compteur par valeur
     counts = np.zeros(m, dtype=np.int64)
-    for i in numba.prange(n):
+    for i in range(n):
         v = part_id[i]
         if v < val_index.size:
             j = val_index[v]
@@ -666,7 +666,7 @@ def find_indices(part_id, sat_id, Nthread):
     flat = np.empty(offsets[-1], dtype=np.int64)
     current = offsets[:-1].copy()
 
-    for i in numba.prange(n):
+    for i in range(n):
         v = part_id[i]
         if v < val_index.size:
             j = val_index[v]
@@ -679,7 +679,7 @@ def find_indices(part_id, sat_id, Nthread):
 
 
 
-@njit(parallel=True, fastmath=True)
+@njit(fastmath=True)
 def compute_sat_from_part(xp, yp, zp, vxp, vyp, vzp,
                           indexes_p,
                           nb_sat, cum_sum_sat, Nthread, seed=None):
@@ -698,7 +698,7 @@ def compute_sat_from_part(xp, yp, zp, vxp, vyp, vzp,
     vy_sat = np.zeros(nb_sat.sum(), dtype=np.float32)
     vz_sat = np.zeros(nb_sat.sum(), dtype=np.float32)
     print('ok', vz_sat.size)
-    for tid in numba.prange(Nthread):
+    for tid in range(Nthread):
         if seed is not None:
             np.random.seed(seed[tid])
 
@@ -728,7 +728,7 @@ def compute_sat_from_part(xp, yp, zp, vxp, vyp, vzp,
     return x_sat, y_sat, z_sat, vx_sat, vy_sat, vz_sat, mask_nfw
 
 
-@njit(parallel=True, fastmath=True)
+@njit(fastmath=True)
 def compute_sat_from_abacus_part(xp, yp, zp, vxp, vyp, vzp, x_sat, y_sat, z_sat, 
                                  vx_sat, vy_sat, vz_sat, npout, npstart, nb_sat, 
                                  cum_sum_sat, Nthread, seed=None):
@@ -768,7 +768,7 @@ def compute_sat_from_abacus_part(xp, yp, zp, vxp, vyp, vzp, x_sat, y_sat, z_sat,
     numba.set_num_threads(Nthread)
     mask_nfw = np.zeros(nb_sat.sum(), dtype='bool')
     hstart = np.rint(np.linspace(0, npout.size, Nthread + 1))
-    for tid in numba.prange(Nthread):
+    for tid in range(Nthread):
         if seed is not None:
             np.random.seed(seed[tid])
 
@@ -796,7 +796,7 @@ def compute_sat_from_abacus_part(xp, yp, zp, vxp, vyp, vzp, x_sat, y_sat, z_sat,
     return mask_nfw
 
 
-@njit(parallel=True)
+@njit
 def _assign_bin_values(bin_idx, col, bins, out):
     """
     Assign scaled values to elements within each bin, in parallel.
@@ -822,7 +822,7 @@ def _assign_bin_values(bin_idx, col, bins, out):
     nbins = len(bins) - 1
     n = len(col)
 
-    for b in numba.prange(nbins):
+    for b in range(nbins):
         # collect indices of elements in this bin
         idx_in_bin = []
         for i in range(n):

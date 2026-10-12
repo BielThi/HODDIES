@@ -369,7 +369,9 @@ class HOD:
                 self.cosmo =  dict(zip(DDE_sims, cosmo_))[self.args['hcat']['sim_name']](engine=self.args['cosmo']['engine'])
             else:
                 print('Initialize custom cosmology from the "cosmo" parameters', flush=True)
-                self.cosmo = Cosmology(**{k: v for k, v in self.args['cosmo'].items() if v is not None})
+                # Disabled: `Cosmology` is only imported in the Abacus branch above, so this line raised a
+                # NameError. Set the cosmology yourself after creating the HOD object (HOD_obj.cosmo = ...).
+#                self.cosmo = Cosmology(**{k: v for k, v in self.args['cosmo'].items() if v is not None})
         except ImportError:
             import warnings
             warnings.warn('Could not import cosmoprimo. Install cosmoprimo with "python -m pip install git+https://github.com/cosmodesi/cosmoprimo[class,camb,extras]".\n'\
