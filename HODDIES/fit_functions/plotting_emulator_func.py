@@ -15,7 +15,6 @@ from typing import Callable, Optional
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-import torch 
 
 
 # ----------------------------------------------------------------------
@@ -509,6 +508,7 @@ def plot_bf_results(train_Dataset, model, x_best_fit, data_vec, err_data_vec,x_t
     indices : sequence of int or None
         Explicit test-set indices to plot.
     """
+    import torch  # imported here so that HODDIES works without torch (only the emulator needs it)
     # ---- predictions -------------------------------------------------
     if x_truth is not None:
         x_norm_truth = torch.tensor(train_Dataset.normalizer.normalize_x(x_truth), dtype=torch.float32)

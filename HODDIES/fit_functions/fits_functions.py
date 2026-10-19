@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import glob
-import torch 
 
 
 def genereate_training_points(nPoints, name_param, priors_lists, sampling_type='lhs', path_to_save_training_point=None, rand_seed=None):
@@ -279,6 +278,7 @@ def func_stochopy(new_params, HOD_obj, fix_seed=10, return_log10chi2=False, verb
 
 
 def likelihood(theta, model, train_Dataset, data, priors, inv_Cdata=None, inv_corr_data=None, sig_data_err=None, logdet_corr_data=0):
+    import torch  # imported here so that HODDIES works without torch (only the emulator needs it)
 
     if not values_in_boundaries(theta, priors):
         return -np.inf
@@ -307,6 +307,7 @@ def likelihood(theta, model, train_Dataset, data, priors, inv_Cdata=None, inv_co
 
 
 def likelihood_vec(thetas, model, train_Dataset, data, priors, inv_Cdata=None, inv_corr_data=None, sig_data_err=None, logdet_corr_data=0):
+    import torch  # imported here so that HODDIES works without torch (only the emulator needs it)
     thetas = np.atleast_2d(thetas)
     inside = np.array([values_in_boundaries(t, priors) for t in thetas])
 

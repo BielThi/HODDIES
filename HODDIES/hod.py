@@ -3,25 +3,15 @@
 import numba
 import time 
 import os
-<<<<<<< HEAD
-from HODDIES.utils import *
-from HODDIES.estimators.clustering_statistics import compute_twopoint, compute_delta_sigma, get_list_stat, compute_CIC, compute_power_spectrum
-from HODDIES import HOD_models
-=======
 from .utils import *
 from .estimators.clustering_statistics import compute_twopoint, compute_delta_sigma, get_list_stat, compute_CIC, compute_power_spectrum
 from . import HOD_models, vsmear_func
->>>>>>> c9224bb (modify vsmear implementation)
 import yaml 
 from mpytools import Catalog
 import collections.abc
-<<<<<<< HEAD
-from .fit_functions.fits_functions import compute_chi2, flatten_stats
-=======
 import hashlib
 import pickle
-from .fit_functions.fits_functions import compute_chi2
->>>>>>> c9224bb (modify vsmear implementation)
+from .fit_functions.fits_functions import compute_chi2, flatten_stats
 import numbers
 import numpy as np
 from HODDIES.sim_loader import BaseLogger
