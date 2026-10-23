@@ -755,8 +755,14 @@ class HOD(BaseLogger):
                     else:
                         seed = None
 
+                    host = {col: np.asarray(sat_cat[col]).copy() for col in ('x', 'y', 'z', 'vx', 'vy', 'vz')}
                     sat_cat['x'], sat_cat['y'], sat_cat['z'], sat_cat['vx'], sat_cat['vy'], sat_cat['vz'], mask_nfw = self.base_catalog.assign_sat_to_part(
                         mask_sat, list_nsat, seed=seed, f_sigv=self.args[tracer]['f_sigv'])
+                    # Satellites without a particle (too few in their halo) are placed below with the NFW
+                    # profile around their host: give them back the host position and velocity, which
+                    # assign_sat_to_part leaves uninitialised for them
+                    for col, values in host.items():
+                        sat_cat[col] = np.where(mask_nfw, values, np.asarray(sat_cat[col], dtype=values.dtype))
                     if verbose:
                         self.logger.debug(f'Sample satellites from particles done in {time.time() - start_part:.2f} sec')
                         self.logger.debug(f'{mask_nfw.sum()} satellites will be positioned using NFW')
