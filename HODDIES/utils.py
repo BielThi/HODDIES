@@ -5,6 +5,14 @@ import scipy
 from scipy.special import gammaln  # log(n!)
 import math 
 
+def wrap_box(values, boxsize):
+    """Positions wrapped into [0, boxsize), in float64. A bare `x % boxsize` can return exactly
+    boxsize (e.g. for float32 x slightly below 0, the result rounds up to boxsize), which
+    Corrfunc refuses ("particles are out of bounds")."""
+    wrapped = np.asarray(values, dtype=np.float64) % boxsize
+    return np.where(wrapped >= boxsize, 0.0, wrapped)
+
+
 def apply_rsd(cat, z, boxsize, cosmo, H_0=100, los='z', vsmear=0):
 
     """
@@ -46,7 +54,9 @@ def apply_rsd(cat, z, boxsize, cosmo, H_0=100, los='z', vsmear=0):
     if not np.all(np.isfinite(vsmear)):
         raise ValueError('vsmear must contain finite velocity errors')
     rsd_factor = 1 / (1 / (1 + z) * H_0 * cosmo.efunc(z))
-    pos_rsd = [cat[p] % boxsize if p !=los else (cat[p] + (cat['v'+p] + vsmear)*rsd_factor) %boxsize for p in 'xyz']    
+    pos_rsd = [wrap_box(cat[p], boxsize) if p != los
+               else wrap_box(np.asarray(cat[p], dtype=np.float64) + (cat['v'+p] + vsmear) * rsd_factor, boxsize)
+               for p in 'xyz']
     return pos_rsd
     
     

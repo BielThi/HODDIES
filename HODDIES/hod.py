@@ -940,7 +940,7 @@ class HOD(BaseLogger):
                 positions[tracer] = apply_rsd(selected, self.z_simu, self.boxsize, self.cosmo,
                     self.H_0, self.args['clustering_settings']['los'], selected['vsmear'])
             else:
-                positions[tracer] = tuple(selected[axis] % self.boxsize for axis in 'xyz')
+                positions[tracer] = tuple(wrap_box(selected[axis], self.boxsize) for axis in 'xyz')
         return positions
     
 
