@@ -23,8 +23,10 @@ sim_abacus=AbacusSummitSim(**param['hcat'])
 HOD_obj = HOD(base_catalog=sim_abacus, setup_logger=False, **param)
 
 
-data_vec = np.loadtxt('/global/homes/a/arocher/Code/postdoc/HODDIES_v2/HODDIES/HODDIES/fit_functions/scripts/results_optimizer/data_test_optimizer.txt')
-mcov= np.loadtxt('/global/cfs/cdirs/desi/users/arocher/HODDIES_results/Abcaus_small_boxes_corr/z0.500/Mcov_small_box_z0.500_wp_xi_ells_LRG_SHOD_6p.txt')
+
+
+data_vec = ...
+mcov= ...
 num_sim = 1786 # number of Abacus small boxes used to compute the covariance matrix
 
 HOD_obj.initialize_fit(data_vec, mcov)  
